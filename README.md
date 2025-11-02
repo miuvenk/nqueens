@@ -1,5 +1,7 @@
 # ♟️ N-Queens Solver — CSP, Simulated Annealing & Genetic Algorithm
 
+> A comparative AI project exploring different problem-solving paradigms — **CSP**, **Simulated Annealing**, and **Genetic Algorithm** — for the classic **N-Queens** puzzle.
+
 ## 🧠 Overview
 This project solves the **N-Queens problem**, which asks for placing N queens on an N×N chessboard so that no two queens attack each other.  
 The goal is to **implement and compare different Artificial Intelligence paradigms** to explore their strengths and limitations in constraint satisfaction and optimization problems.
