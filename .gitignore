@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.dist/
+.build/
+
+# Virtual env
+.venv/
+env/
+venv/
+
+# IDE
+.vscode/
+
+# Outputs
+results/*.csv
+.ipynb_checkpoints/
