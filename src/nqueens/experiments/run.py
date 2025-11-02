@@ -39,7 +39,7 @@ def run(ns=(8, 16, 32), repeats=3, seed=42, time_limit_each=5.0, methods=("CSP",
             print(row)  # ensure something is printed
             rows.append(row)
 
-    out = Path(__file__).resolve().parents[3] / "results" / "results_csp.csv"
+    out = Path(__file__).resolve().parents[3] / "results" / "results.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     write_rows_csv(out, rows)
     print(f"\nSaved CSV -> {out}")
