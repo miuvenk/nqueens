@@ -13,8 +13,9 @@ from nqueens.common.metrics import timer
 #from nqueens.csp.solver import solve_basic as csp_basic, solve_dynamic as csp_dynamic
 from nqueens.csp.solver import solve_basic, solve_dynamic
 
-# --- Optional: SA / GA (will be added later) ---
-#from nqueens.sa.solver import solve as sa_solve  
+from nqueens.sa.solver import solve as sa_solve  
+
+# --- Optional: GA (will be added later) ---
 #from nqueens.ga.solver import solve as ga_solve  
 
 
@@ -22,6 +23,18 @@ from nqueens.csp.solver import solve_basic, solve_dynamic
 SOLVERS: Dict[str, Callable[[int, float, Optional[int]], Optional[np.ndarray]]] = {
     "CSP_basic":   solve_basic,
     "CSP_dynamic": solve_dynamic,
+    # "SA": lambda n, tl, seed: sa_solve(n, time_limit=tl, seed=seed),
+    "SA": lambda n, tl, seed: sa_solve(
+    n,
+    time_limit=tl,
+    seed=seed,
+    T0=4.0,          # Initial temperature: controls the probability of accepting worse moves early in the search.
+    alpha=0.993,     # Cooling rate: determines how quickly the temperature decreases (slower cooling = more exploration).
+    Tmin=5e-4,       # Minimum temperature: stopping threshold for the cooling schedule.
+    iters_per_T=max(10, n),  # Number of neighbor evaluations per temperature step (higher = better sampling).
+    max_steps=120_000,       # Maximum total number of iterations (safety limit to prevent infinite loops).
+    use_swap_prob=0.15,      # Probability of performing a swap move instead of a single-queen column change (helps escape local minima).
+    )
 }
 #if sa_solve:
 #    SOLVERS["SA"] = lambda n, tl, seed: sa_solve(n, time_limit=tl, seed=seed)  # type: ignore
@@ -44,7 +57,7 @@ def run(
     repeats: int = 3,
     seed: Optional[int] = 42,
     time_limit_each: float = 5.0,
-    methods: tuple[str, ...] = ("CSP_basic", "CSP_dynamic"),
+    methods: tuple[str, ...] = ("CSP_basic", "CSP_dynamic", "SA"),
     repeats_map: Optional[Dict[str, int]] = None,
     out_path: Optional[Path] = None,
 ) -> None:
@@ -107,14 +120,16 @@ def run(
 
 
 if __name__ == "__main__":
-    # Example: CSP only
     run(
-        ns=(8, 16, 32),
+        ns=(8, 16, 32, 64),
         repeats=3,
         seed=42,
         time_limit_each=5.0,
-        methods=("CSP_basic", "CSP_dynamic"),
-        # When add SA/GA,
-        # methods=("CSP_basic", "CSP_dynamic", "SA", "GA"),
-        # repeats_map={"SA": 10, "GA": 10, "CSP_basic": 1, "CSP_dynamic": 1},
+        methods=("CSP_basic", "CSP_dynamic" ,"SA"),
+        repeats_map={
+            "SA": 10, 
+            #"GA": 10, 
+            "CSP_basic": 1, 
+            "CSP_dynamic": 1
+        },
     )
