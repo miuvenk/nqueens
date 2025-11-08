@@ -14,33 +14,38 @@ from nqueens.common.metrics import timer
 from nqueens.csp.solver import solve_basic, solve_dynamic
 
 from nqueens.sa.solver import solve as sa_solve  
-
-# --- Optional: GA (will be added later) ---
-#from nqueens.ga.solver import solve as ga_solve  
+from nqueens.ga.solver import solve as ga_solve  
 
 
 # Map method name -> callable(n, time_limit, seed) -> np.ndarray | None
 SOLVERS: Dict[str, Callable[[int, float, Optional[int]], Optional[np.ndarray]]] = {
     "CSP_basic":   solve_basic,
     "CSP_dynamic": solve_dynamic,
-    # "SA": lambda n, tl, seed: sa_solve(n, time_limit=tl, seed=seed),
+    #balanced SA
     "SA": lambda n, tl, seed: sa_solve(
-    n,
-    time_limit=tl,
-    seed=seed,
-    T0=4.0,          # Initial temperature: controls the probability of accepting worse moves early in the search.
-    alpha=0.993,     # Cooling rate: determines how quickly the temperature decreases (slower cooling = more exploration).
-    Tmin=5e-4,       # Minimum temperature: stopping threshold for the cooling schedule.
-    iters_per_T=max(10, n),  # Number of neighbor evaluations per temperature step (higher = better sampling).
-    max_steps=120_000,       # Maximum total number of iterations (safety limit to prevent infinite loops).
-    use_swap_prob=0.15,      # Probability of performing a swap move instead of a single-queen column change (helps escape local minima).
-    )
+        n,
+        time_limit=tl,
+        seed=seed,
+        T0=4.0,          # Initial temperature: controls the probability of accepting worse moves early in the search.
+        alpha=0.993,     # Cooling rate: determines how quickly the temperature decreases (slower cooling = more exploration).
+        Tmin=5e-4,       # Minimum temperature: stopping threshold for the cooling schedule.
+        iters_per_T=max(10, n),  # Number of neighbor evaluations per temperature step (higher = better sampling).
+        max_steps=120_000,       # Maximum total number of iterations (safety limit to prevent infinite loops).
+        use_swap_prob=0.15,      # Probability of performing a swap move instead of a single-queen column change (helps escape local minima).
+    ),
+    #balanced GA
+    "GA": lambda n, tl, seed: ga_solve( 
+        n,
+        time_limit=tl,
+        seed=seed,
+        pop_size=100,
+        cx_prob=0.8,
+        mut_prob=0.05,
+        max_generations=2000,
+        tournament_size=5,
+        elitism=True,
+    ),
 }
-#if sa_solve:
-#    SOLVERS["SA"] = lambda n, tl, seed: sa_solve(n, time_limit=tl, seed=seed)  # type: ignore
-#if ga_solve:
-#    SOLVERS["GA"] = lambda n, tl, seed: ga_solve(n, time_limit=tl, seed=seed)  # type: ignore
-
 
 def _project_root(start: Path) -> Path:
     """Find repo root by walking up to pyproject.toml (fallback: start's parent)."""
@@ -125,10 +130,10 @@ if __name__ == "__main__":
         repeats=3,
         seed=42,
         time_limit_each=5.0,
-        methods=("CSP_basic", "CSP_dynamic" ,"SA"),
+        methods=("CSP_basic", "CSP_dynamic" ,"SA", "GA"),
         repeats_map={
             "SA": 10, 
-            #"GA": 10, 
+            "GA": 10, 
             "CSP_basic": 1, 
             "CSP_dynamic": 1
         },
