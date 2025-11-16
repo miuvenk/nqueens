@@ -19,5 +19,4 @@ venv/
 .vscode/
 
 # Outputs
-results/*.csv
 .ipynb_checkpoints/
