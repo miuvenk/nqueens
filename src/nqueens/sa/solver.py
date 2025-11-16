@@ -42,7 +42,7 @@ def solve(
     alpha: float = 0.98,
     Tmin: float = 1e-3,
     max_steps: int = 50_000,
-    iters_per_T: Optional[int] = None,
+    iters_per_T: Optional[int] = max(10, n),
     use_swap_prob: float = 0.0,
 ) -> Optional[List[int]]:
     """
