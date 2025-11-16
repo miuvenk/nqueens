@@ -132,11 +132,12 @@ To visualize runtimes and success rates:
 python -m nqueens.experiments.plot_results
 ```
 This creates figures under:
-
+```bash
 results/plots/
     ├── csp_internal_runtime.png
     ├── all_methods_runtime_log.png
     └── success_rate.png
+```
 
 ## 📁 Project Structure
 
