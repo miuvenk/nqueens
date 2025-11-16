@@ -1,6 +1,6 @@
 # ♟️ N-Queens Solver — CSP, Simulated Annealing & Genetic Algorithm
 
-> A comparative AI project exploring different problem-solving paradigms — **CSP**, **Simulated Annealing**, and **Genetic Algorithm** — for the classic **N-Queens** puzzle.
+> A comparative AI project exploring different problem-solving paradigms — **CSP-Basic**, **CSP_Dynamic**, **Simulated Annealing**, and **Genetic Algorithm** — for the classic **N-Queens** puzzle.
 
 ## 🧠 Overview
 This project solves the **N-Queens problem**, which asks for placing N queens on an N×N chessboard so that no two queens attack each other.  
@@ -11,9 +11,10 @@ The goal is to **implement and compare different Artificial Intelligence paradig
 
 | Approach                                  | Description                                                                                    | Status          |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
-| **CSP (Constraint Satisfaction Problem)** | Systematic search using Backtracking, Constraint Propagation, MRV & LCV heuristics             | ✅ Implemented   |
-| **Simulated Annealing (SA)**              | Local search with probabilistic acceptance (geometric cooling schedule)                        | 🛠️ In Progress |
-| **Genetic Algorithm (GA)**                | Population-based evolutionary search with crossover & mutation                                 | 🛠️ In Progress |
+| **CSP-Basic**                             | Backtracking + Forward Checking (fixed variable/value ordering)                                | ✅ Implemented   |
+| **CSP-Dynamic**                           | Backtracking + Forward Checking + MRV + LCV heuristics                                         | ✅ Implemented   |
+| **Simulated Annealing (SA)**              | Local search with probabilistic acceptance (geometric cooling schedule)                        | ✅ Implemented  |
+| **Genetic Algorithm (GA)**                | Population-based evolutionary search with crossover & mutation                                 | ✅ Implemented  |
 | **Projected Gradient (Relaxed Problem)**  | Continuous relaxation of the N-Queens constraint problem solved via projected gradient descent | 🚧 Planned      |
 
 
@@ -42,6 +43,15 @@ pip install -e .
 ## Requirements:
   - Python ≥ 3.9
   - NumPy ≥ 2.0.0
+  - (Optional) Matplotlib ≥ 3.0 (only for plotting results)
+
+**NOTE:** If you want to generate result plots:
+```bash
+pip install matplotlib
+```
+
+⚠️ Matplotlib is used only for visualization.
+It is not used inside CSP, SA, or GA solvers.
 
 ## 🚀 Run Experiments
 
@@ -49,14 +59,14 @@ pip install -e .
 python -m nqueens.experiments.run
 ```
 
-By default, the script runs the CSP solver for `n = 8, 16, 32`  
+By default, the script runs the CSP solver for `n = 8, 16, 32, 64`  
 and saves results to **`results/results.csv`**.
 
 You can edit **`src/nqueens/experiments/run.py`** to customize experiments:
 
 - Add or remove methods in  
   ```python
-  methods = ("CSP", "SA", "GA")
+  methods = ("CSP-basic", "CSP-dynamic "SA", "GA")
   ```
 
 - Change board sizes
@@ -68,7 +78,65 @@ You can edit **`src/nqueens/experiments/run.py`** to customize experiments:
    ```python
    time_limit_each = 5.0
    repeats = 3
+   repeats_map = {"SA": 10, "GA": 10, "CSP_basic": 1, "CSP_dynamic": 1}
    ```
+## 🔧 Tuning SA & GA Parameters
+
+The hyper-parameters for Simulated Annealing and Genetic Algorithm are configured in
+src/nqueens/experiments/run.py, inside the SOLVERS dictionary:
+```bash
+# Map method name -> callable(n, time_limit, seed) -> np.ndarray | None
+SOLVERS: Dict[str, Callable[[int, float, Optional[int]], Optional[np.ndarray]]] = {
+    "CSP_basic":   solve_basic,
+    "CSP_dynamic": solve_dynamic,
+
+    # Balanced Simulated Annealing configuration
+    "SA": lambda n, tl, seed: sa_solve(
+        n,
+        time_limit=tl,
+        seed=seed,
+        T0=4.0,          # initial temperature
+        alpha=0.993,     # cooling rate
+        Tmin=5e-4,       # minimum temperature
+        iters_per_T=max(10, n),
+        max_steps=120_000,
+        use_swap_prob=0.15,
+    ),
+
+    # Balanced Genetic Algorithm configuration
+    "GA": lambda n, tl, seed: ga_solve(
+        n,
+        time_limit=tl,
+        seed=seed,
+        pop_size=100,
+        cx_prob=0.8,
+        mut_prob=0.05,
+        max_generations=2000,
+        tournament_size=5,
+        elitism=True,
+    ),
+}
+```
+
+You can modify these values to study how different parameter settings affect:
+  -convergence speed,
+  -success rate,
+  -and scalability for larger N.
+
+This allows you to reproduce the experiments in the report and also explore alternative SA/GA behaviors under the same unified experiment runner.
+
+## 📊 Generate Plots
+
+To visualize runtimes and success rates:
+```bash
+python -m nqueens.experiments.plot_results
+```
+This creates figures under:
+
+results/plots/
+    ├── csp_internal_runtime.png
+    ├── all_methods_runtime_log.png
+    └── success_rate.png
 
 ## 📁 Project Structure
 
@@ -93,7 +161,8 @@ nqueens/
         ├── ga/                   # genetic algorithm approach
         │   └── solver.py         # population evolution
         └── experiments/          # experiment driver
-            └── run.py            # main entry point (python -m nqueens.experiments.run)
+            ├── run.py            # main entry point (python -m nqueens.experiments.run)
+            └── plot_results.py   # result visualization (python -m nqueens.experiments.plot_results)
 ```
 
 ## 📈 Experimental Setup
