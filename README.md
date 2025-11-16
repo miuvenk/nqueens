@@ -66,7 +66,7 @@ You can edit **`src/nqueens/experiments/run.py`** to customize experiments:
 
 - Add or remove methods in  
   ```python
-  methods = ("CSP-basic", "CSP-dynamic "SA", "GA")
+  methods = ("CSP-basic", "CSP-dynamic", "SA", "GA")
   ```
 
 - Change board sizes
